@@ -1,22 +1,19 @@
 package com.example.restdocapp.user;
 
+import com.example.restdocapp.MyWithRestDoc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-@AutoConfigureMockMvc
-@SpringBootTest
-public class UserControllerTest {
-
-    @Autowired
-    private MockMvc mvc;
+@AutoConfigureRestDocs(uriScheme = "http", uriHost = "localhost", uriPort = 8080)
+@SpringBootTest // 메모리 창에 모든 test코드를 띄운다
+public class UserControllerTest extends MyWithRestDoc {
 
     @Test
     public void join_test() throws Exception {
@@ -32,7 +29,7 @@ public class UserControllerTest {
         System.out.println("================================");
 
         // when
-        ResultActions resultActions = mvc.perform(
+        ResultActions resultActions = mockMvc.perform(
                 MockMvcRequestBuilders
                         .post("/join")
                         .content(requestBody)
@@ -48,7 +45,9 @@ public class UserControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.response.username").value("cos"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.response.password").value("1234"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.response.email").value("cos@nate.com"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.error").isEmpty());
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error").isEmpty())
+                .andDo(MockMvcResultHandlers.print())
+                .andDo(document);
     }
 
     @Test
@@ -57,7 +56,7 @@ public class UserControllerTest {
         int id = 1;
 
         // when
-        ResultActions resultActions = mvc.perform(
+        ResultActions resultActions = mockMvc.perform(
                 MockMvcRequestBuilders
                         .get("/users/" + id));
         String responseBody = resultActions.andReturn().getResponse().getContentAsString();
@@ -71,6 +70,8 @@ public class UserControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.response.username").value("ssar"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.response.password").value("1234"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.response.email").value("ssar@nate.com"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.error").isEmpty());
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error").isEmpty())
+                .andDo(MockMvcResultHandlers.print())
+                .andDo(document);
     }
 }
